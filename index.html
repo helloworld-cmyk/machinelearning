@@ -1,0 +1,1601 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ML Quiz — Ôn tập trắc nghiệm</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --surface: #181b24;
+      --surface-2: #1e2230;
+      --border: rgba(255,255,255,0.08);
+      --text: #e8eaef;
+      --text-muted: #8b92a5;
+      --accent: #6366f1;
+      --accent-light: #818cf8;
+      --accent-glow: rgba(99,102,241,0.25);
+      --success: #22c55e;
+      --success-bg: rgba(34,197,94,0.12);
+      --error: #ef4444;
+      --error-bg: rgba(239,68,68,0.12);
+      --warning: #f59e0b;
+      --warning-bg: rgba(245,158,11,0.12);
+      --radius: 14px;
+      --radius-sm: 8px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.35);
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 10% -10%, rgba(99,102,241,0.18), transparent),
+        radial-gradient(ellipse 60% 50% at 90% 100%, rgba(139,92,246,0.12), transparent);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .app { position: relative; z-index: 1; display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 300px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      padding: 24px 20px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent), #8b5cf6);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .logo h1 { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; }
+    .logo-sub { font-size: 0.78rem; color: var(--text-muted); padding-left: 46px; }
+
+    .sidebar.dragover {
+      box-shadow: inset 0 0 0 2px var(--accent);
+      background: rgba(99,102,241,0.04);
+    }
+
+    .file-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 12px 12px;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .file-list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 0 4px 10px;
+      flex-shrink: 0;
+    }
+
+    .file-list-title {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    .import-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border: 1px solid rgba(99,102,241,0.35);
+      border-radius: var(--radius-sm);
+      background: rgba(99,102,241,0.12);
+      color: var(--accent-light);
+      font-family: inherit;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .import-btn:hover {
+      background: rgba(99,102,241,0.2);
+      border-color: var(--accent);
+    }
+
+    .import-btn svg {
+      width: 14px;
+      height: 14px;
+      opacity: 0.85;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: var(--transition);
+      border: 1px solid transparent;
+      margin-bottom: 4px;
+    }
+
+    .file-item:hover { background: var(--surface-2); }
+    .file-item.active {
+      background: rgba(99,102,241,0.12);
+      border-color: rgba(99,102,241,0.3);
+    }
+
+    .file-item-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--surface-2);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .file-item.active .file-item-icon { background: rgba(99,102,241,0.2); }
+
+    .file-item-info { flex: 1; min-width: 0; }
+    .file-item-name {
+      font-size: 0.85rem;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-item-meta {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    .mini-progress {
+      flex: 1;
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .mini-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-light));
+      border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+
+    .file-item-delete {
+      opacity: 0;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      transition: var(--transition);
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .file-item:hover .file-item-delete { opacity: 1; }
+    .file-item-delete:hover { color: var(--error); background: var(--error-bg); }
+
+    /* Main */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .main-header {
+      padding: 20px 32px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      background: rgba(24,27,36,0.6);
+      backdrop-filter: blur(12px);
+    }
+
+    .main-header h2 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .header-stats {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .stat-value.correct { color: var(--success); }
+    .stat-value.wrong { color: var(--error); }
+    .stat-label { font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+
+    .main-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 28px 32px;
+    }
+
+    /* Welcome */
+    .welcome {
+      max-width: 520px;
+      margin: 60px auto;
+      text-align: center;
+    }
+
+    .welcome-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 24px;
+      background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.15));
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+    }
+
+    .welcome h2 { font-size: 1.6rem; margin-bottom: 12px; letter-spacing: -0.03em; }
+    .welcome p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 28px; }
+
+    .format-hint {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      text-align: left;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    /* Quiz layout */
+    .quiz-layout {
+      display: grid;
+      grid-template-columns: 1fr 175px;
+      gap: 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 900px) {
+      .app { flex-direction: column; }
+      .sidebar { width: 100%; max-height: 280px; }
+      .quiz-layout { grid-template-columns: 1fr; }
+    }
+
+    /* Question card */
+    .question-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .question-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(99,102,241,0.15);
+      color: var(--accent-light);
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+
+    .question-badge.multi { background: var(--warning-bg); color: var(--warning); }
+
+    .question-text {
+      font-size: 1.05rem;
+      margin-bottom: 24px;
+      line-height: 1.7;
+    }
+
+    .question-text code {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--surface-2);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.88em;
+    }
+
+    .question-text pre {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      overflow-x: auto;
+      margin: 12px 0;
+    }
+
+    .question-text pre code { background: none; padding: 0; }
+
+    .question-images {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 16px 0 20px;
+    }
+
+    .question-image {
+      max-width: 100%;
+      height: auto;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: #fff;
+      cursor: zoom-in;
+      transition: var(--transition);
+    }
+
+    .question-image:hover { border-color: rgba(99,102,241,0.4); }
+
+    .question-text img {
+      max-width: 100%;
+      height: auto;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: #fff;
+      margin: 12px 0;
+      display: block;
+    }
+
+    .options { display: flex; flex-direction: column; gap: 10px; }
+
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: var(--transition);
+      background: var(--surface-2);
+    }
+
+    .option:hover:not(.disabled) {
+      border-color: rgba(99,102,241,0.4);
+      background: rgba(99,102,241,0.05);
+    }
+
+    .option.selected {
+      border-color: var(--accent);
+      background: rgba(99,102,241,0.1);
+    }
+
+    .option.correct {
+      border-color: var(--success);
+      background: var(--success-bg);
+    }
+
+    .option.wrong {
+      border-color: var(--error);
+      background: var(--error-bg);
+    }
+
+    .option.missed {
+      border-color: var(--success);
+      background: var(--success-bg);
+      opacity: 0.7;
+    }
+
+    .option.disabled { cursor: default; }
+
+    .option-marker {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.28);
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+      transition: var(--transition);
+      box-sizing: border-box;
+    }
+
+    .options.multi .option-marker {
+      border-radius: 5px;
+    }
+
+    .option-marker-inner {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      transform: scale(0);
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+
+    .options.multi .option-marker-inner {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+    }
+
+    .option:hover:not(.disabled) .option-marker {
+      border-color: rgba(99,102,241,0.55);
+    }
+
+    .option.selected .option-marker {
+      border-color: var(--accent);
+    }
+
+    .option.selected .option-marker-inner {
+      transform: scale(1);
+      background: var(--accent);
+    }
+
+    .option.correct .option-marker,
+    .option.missed .option-marker {
+      border-color: var(--success);
+    }
+
+    .option.correct .option-marker-inner,
+    .option.missed .option-marker-inner {
+      transform: scale(1);
+      background: var(--success);
+    }
+
+    .option.wrong .option-marker {
+      border-color: var(--error);
+    }
+
+    .option.wrong .option-marker-inner {
+      transform: scale(1);
+      background: var(--error);
+    }
+
+    .option-letter {
+      font-weight: 700;
+      margin-right: 6px;
+      color: var(--text-muted);
+    }
+
+    .option.selected .option-letter { color: var(--accent-light); }
+    .option.correct .option-letter,
+    .option.missed .option-letter { color: var(--success); }
+    .option.wrong .option-letter { color: var(--error); }
+
+    .option-text {
+      flex: 1;
+      font-size: 0.95rem;
+      padding-top: 3px;
+      min-width: 0;
+    }
+
+    /* Markdown content (question body + options) */
+    .md-content { line-height: 1.6; }
+    .md-content > :first-child { margin-top: 0; }
+    .md-content > :last-child { margin-bottom: 0; }
+
+    .md-content p { margin: 0.5em 0; }
+    .md-content strong { color: var(--text); font-weight: 600; }
+
+    .md-content code {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--surface-2);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.88em;
+    }
+
+    .md-content pre {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      overflow-x: auto;
+      margin: 12px 0;
+    }
+
+    .md-content pre code { background: none; padding: 0; }
+
+    .md-content table {
+      border-collapse: collapse;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.86em;
+      margin: 6px 0 14px;
+      width: auto;
+      max-width: 100%;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+
+    .md-content th,
+    .md-content td {
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .md-content th {
+      background: rgba(99,102,241,0.18);
+      color: var(--accent-light);
+      font-weight: 600;
+      font-size: 0.92em;
+    }
+
+    .md-content td {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+
+    .md-content tbody tr:hover td {
+      background: rgba(99,102,241,0.08);
+    }
+
+    /* Relation labels (r, t, …) above tables in question stem */
+    .question-text .md-content p:has(+ table) {
+      margin-bottom: 4px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--accent-light);
+    }
+
+    .question-text .md-content p:has(+ table) + table {
+      margin-top: 0;
+    }
+
+    .question-text .md-content .relation-pair {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px 28px;
+      align-items: flex-start;
+      margin: 12px 0 18px;
+    }
+
+    .question-text .md-content .relation-block {
+      flex: 0 0 auto;
+    }
+
+    .question-text .md-content .relation-block > p {
+      margin-bottom: 4px;
+    }
+
+    .question-text .md-content .relation-block > table {
+      margin-bottom: 0;
+    }
+
+    .option-text .md-content table {
+      font-size: 0.8em;
+      margin: 2px 0 0;
+    }
+
+    .option-text .md-content th,
+    .option-text .md-content td {
+      padding: 4px 10px;
+    }
+
+    .feedback {
+      margin-top: 20px;
+      padding: 14px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      display: none;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .feedback.show { display: flex; }
+    .feedback.correct { background: var(--success-bg); color: var(--success); border: 1px solid rgba(34,197,94,0.3); }
+    .feedback.wrong { background: var(--error-bg); color: var(--error); border: 1px solid rgba(239,68,68,0.3); }
+
+    .ans-note {
+      font-size: 0.78rem;
+      color: var(--warning);
+      margin-top: 8px;
+      font-style: italic;
+    }
+
+    /* Nav panel */
+    .nav-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px;
+      position: sticky;
+      top: 0;
+    }
+
+    .nav-panel h3 {
+      font-size: 0.58rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .progress-bar-wrap { margin-bottom: 6px; }
+    .progress-bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.58rem;
+      color: var(--text-muted);
+      margin-bottom: 3px;
+    }
+
+    .progress-bar {
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #8b5cf6);
+      border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+
+    .question-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 10px;
+      max-height: 120px;
+      overflow-y: auto;
+    }
+
+    .q-dot {
+      width: 24px;
+      height: 24px;
+      border: none;
+      border-radius: 5px;
+      background: var(--surface-2);
+      color: #f1f5f9;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+      flex-shrink: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .q-dot:hover { background: rgba(99,102,241,0.28); color: #fff; }
+    .q-dot.current { background: var(--accent); color: #fff; box-shadow: 0 0 5px var(--accent-glow); }
+    .q-dot.answered { background: rgba(99,102,241,0.32); color: #c7d2fe; }
+    .q-dot.checked-correct { background: var(--success-bg); color: #4ade80; }
+    .q-dot.checked-wrong { background: var(--error-bg); color: #fca5a5; }
+
+    .nav-actions { display: flex; flex-direction: column; gap: 8px; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #7c3aed);
+      color: white;
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px var(--accent-glow); }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .btn-secondary {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover { background: rgba(255,255,255,0.06); }
+
+    .btn-danger {
+      background: var(--error-bg);
+      color: var(--error);
+      border: 1px solid rgba(239,68,68,0.25);
+    }
+
+    .btn-danger:hover { background: rgba(239,68,68,0.2); }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .btn-row .btn { flex: 1; }
+
+    /* Results overlay */
+    .results-card {
+      max-width: 480px;
+      margin: 40px auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 36px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    .results-score {
+      font-size: 3.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-light), #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.1;
+      margin: 16px 0 8px;
+    }
+
+    .results-detail { color: var(--text-muted); margin-bottom: 28px; }
+
+    .results-actions { display: flex; flex-direction: column; gap: 10px; }
+
+    .hidden { display: none !important; }
+
+    input[type="file"] { display: none; }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 20px;
+      font-size: 0.88rem;
+      box-shadow: var(--shadow);
+      z-index: 100;
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <div class="logo-icon">🧠</div>
+          <h1>ML Quiz</h1>
+        </div>
+        <p class="logo-sub">Ôn tập trắc nghiệm Machine Learning</p>
+      </div>
+
+      <div class="file-list">
+        <div class="file-list-header">
+          <div class="file-list-title">Đề đã import</div>
+          <button type="button" class="import-btn" id="importBtn" title="Import file .md hoặc kéo thả vào sidebar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 16V4m0 0L8 8m4-4l4 4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>
+            </svg>
+            Import .md
+          </button>
+          <input type="file" id="fileInput" accept=".md,.txt" multiple>
+        </div>
+        <div id="fileList"></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="main-header hidden" id="mainHeader">
+        <h2 id="currentFileName">—</h2>
+        <div class="header-stats">
+          <div class="stat">
+            <div class="stat-value" id="statTotal">0</div>
+            <div class="stat-label">Tổng câu</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value correct" id="statCorrect">0</div>
+            <div class="stat-label">Đúng</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value wrong" id="statWrong">0</div>
+            <div class="stat-label">Sai</div>
+          </div>
+        </div>
+      </header>
+
+      <div class="main-body" id="mainBody">
+        <div class="welcome" id="welcomeScreen">
+          <div class="welcome-icon">📚</div>
+          <h2>Bắt đầu ôn tập</h2>
+          <p>Import file .md chứa câu hỏi trắc nghiệm. Tiến trình làm bài được lưu tự động cho từng file riêng biệt.</p>
+          <div class="format-hint">
+Câu 1: Nội dung câu hỏi
+img: assets/hinh-minh-hoa.png
+A. Đáp án A
+B. Đáp án B
+C. Đáp án C
+D. Đáp án D
+ans: B
+
+Câu 2: ...
+          </div>
+          <p style="margin-top:16px;font-size:0.82rem;color:var(--text-muted);">
+            Ảnh: đặt file vào thư mục <code style="background:var(--surface-2);padding:2px 6px;border-radius:4px;">assets/</code> cạnh file .md,
+            thêm dòng <code style="background:var(--surface-2);padding:2px 6px;border-radius:4px;">img: assets/ten-anh.png</code>
+            hoặc <code style="background:var(--surface-2);padding:2px 6px;border-radius:4px;">![mô tả](assets/ten-anh.png)</code>
+          </p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const STORAGE_PREFIX = 'ml-quiz-v1';
+    const FILES_KEY = `${STORAGE_PREFIX}-files`;
+
+    let files = {};
+    let activeFileId = null;
+
+    const $ = (sel) => document.querySelector(sel);
+
+    function fileId(name) {
+      return name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    }
+
+    function loadFilesMeta() {
+      try {
+        return JSON.parse(localStorage.getItem(FILES_KEY)) || {};
+      } catch { return {}; }
+    }
+
+    function saveFilesMeta() {
+      const meta = {};
+      for (const [id, f] of Object.entries(files)) {
+        meta[id] = {
+          name: f.name,
+          questionCount: f.questions.length,
+          importedAt: f.importedAt,
+          basePath: f.basePath || '',
+          path: f.path || ''
+        };
+      }
+      localStorage.setItem(FILES_KEY, JSON.stringify(meta));
+    }
+
+    function progressKey(id) { return `${STORAGE_PREFIX}-progress-${id}`; }
+    function contentKey(id) { return `${STORAGE_PREFIX}-content-${id}`; }
+
+    function loadProgress(id) {
+      try {
+        return JSON.parse(localStorage.getItem(progressKey(id))) || defaultProgress();
+      } catch { return defaultProgress(); }
+    }
+
+    function saveProgress(id) {
+      if (!files[id]) return;
+      localStorage.setItem(progressKey(id), JSON.stringify(files[id].progress));
+    }
+
+    function defaultProgress() {
+      return { currentIndex: 0, answers: {}, checked: {}, showResults: false };
+    }
+
+    function resolveAssetPath(basePath, imgPath) {
+      const src = imgPath.trim();
+      if (/^(https?:|data:|\/)/i.test(src)) return src;
+      if (basePath) return basePath + src.replace(/^\.\//, '');
+      return src;
+    }
+
+    function parseMarkdown(content) {
+      const questions = [];
+      const blocks = content.split(/\n(?=Câu\s+\d+\s*:)/i).filter(b => b.trim());
+
+      for (const block of blocks) {
+        const lines = block.trim().split('\n');
+        const headerMatch = lines[0].match(/^Câu\s+(\d+)\s*:\s*(.*)$/i);
+        if (!headerMatch) continue;
+
+        const number = parseInt(headerMatch[1], 10);
+        let questionText = headerMatch[2].trim();
+        const images = [];
+        const options = {};
+        let correctAnswer = '';
+        let ansNote = '';
+        let currentOption = null;
+
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i].trim();
+
+          if (!line) {
+            if (currentOption) {
+              options[currentOption] += '\n';
+            } else if (Object.keys(options).length === 0) {
+              questionText += '\n';
+            }
+            continue;
+          }
+
+          const ansMatch = line.match(/^ans\s*:\s*(.+)$/i);
+          if (ansMatch) {
+            currentOption = null;
+            let ansPart = ansMatch[1].trim();
+            const noteMatch = ansPart.match(/\[(suy luận|không chắc)\]/i);
+            if (noteMatch) ansNote = noteMatch[1];
+            correctAnswer = ansPart
+              .replace(/\s*\[.*?\]\s*/g, '')
+              .replace(/\s/g, '')
+              .toUpperCase()
+              .split(',')
+              .sort()
+              .join(',');
+            continue;
+          }
+
+          const imgMatch = line.match(/^img\s*:\s*(.+)$/i);
+          if (imgMatch) {
+            currentOption = null;
+            images.push(imgMatch[1].trim());
+            continue;
+          }
+
+          const optMatch = line.match(/^([A-Z])\.\s*(.*)$/);
+          if (optMatch) {
+            currentOption = optMatch[1];
+            options[currentOption] = optMatch[2].trim();
+            continue;
+          }
+
+          if (currentOption) {
+            options[currentOption] += (options[currentOption] ? '\n' : '') + line;
+          } else if (Object.keys(options).length === 0) {
+            questionText += (questionText ? '\n' : '') + line;
+          }
+        }
+
+        if (Object.keys(options).length === 0) continue;
+
+        questions.push({
+          number,
+          questionText,
+          images,
+          options,
+          correctAnswer,
+          ansNote,
+          isMulti: correctAnswer.includes(',')
+        });
+      }
+
+      return questions.sort((a, b) => a.number - b.number);
+    }
+
+    function renderMarkdown(text, basePath = '') {
+      let processed = text;
+      if (basePath) {
+        processed = processed.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, src) =>
+          `![${alt}](${resolveAssetPath(basePath, src)})`
+        );
+      }
+      if (typeof marked !== 'undefined') {
+        const html = marked.parse(processed, { breaks: true, gfm: true });
+        return `<div class="md-content">${html}</div>`;
+      }
+      return `<div class="md-content">${processed.replace(/\n/g, '<br>')}</div>`;
+    }
+
+    function renderQuestionImages(images, basePath) {
+      if (!images?.length) return '';
+      return `
+        <div class="question-images">
+          ${images.map(src => {
+            const url = resolveAssetPath(basePath, src);
+            return `<img class="question-image" src="${url}" alt="Hình minh họa" loading="lazy" onclick="window.open(this.src,'_blank')">`;
+          }).join('')}
+        </div>`;
+    }
+
+    function toast(msg) {
+      const el = document.createElement('div');
+      el.className = 'toast';
+      el.textContent = msg;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 2800);
+    }
+
+    async function importFile(file, basePath = '') {
+      const text = await file.text();
+      const questions = parseMarkdown(text);
+
+      if (questions.length === 0) {
+        toast(`⚠️ Không tìm thấy câu hỏi trong "${file.name}"`);
+        return;
+      }
+
+      const id = fileId(file.name);
+      const existing = loadProgress(id);
+
+      files[id] = {
+        name: file.name,
+        basePath,
+        path: '',
+        questions,
+        importedAt: Date.now(),
+        progress: existing
+      };
+
+      localStorage.setItem(contentKey(id), text);
+      saveFilesMeta();
+      saveProgress(id);
+
+      activeFileId = id;
+      renderFileList();
+      renderQuiz();
+      toast(`✓ Đã import ${questions.length} câu từ "${file.name}"`);
+    }
+
+    async function loadQuizFromPath(path) {
+      const res = await fetch(path);
+      if (!res.ok) return false;
+
+      const text = await res.text();
+      const questions = parseMarkdown(text);
+      if (questions.length === 0) return false;
+
+      const name = path.split('/').pop();
+      const basePath = path.includes('/') ? path.slice(0, path.lastIndexOf('/') + 1) : '';
+      const id = fileId(name);
+      const existing = loadProgress(id);
+
+      files[id] = {
+        name,
+        path,
+        basePath,
+        questions,
+        importedAt: files[id]?.importedAt || Date.now(),
+        progress: existing
+      };
+
+      localStorage.setItem(contentKey(id), text);
+      return true;
+    }
+
+    async function loadManifestQuizzes() {
+      try {
+        const res = await fetch('manifest.json');
+        if (!res.ok) return;
+
+        const { quizzes } = await res.json();
+        if (!Array.isArray(quizzes)) return;
+
+        for (const entry of quizzes) {
+          const path = typeof entry === 'string' ? entry : entry.path;
+          if (path) await loadQuizFromPath(path);
+        }
+
+        saveFilesMeta();
+      } catch {
+        /* manifest.json tùy chọn — cần chạy qua HTTP server */
+      }
+    }
+
+    function deleteFile(id, e) {
+      e.stopPropagation();
+      if (!confirm(`Xóa "${files[id].name}" và tiến trình làm bài?`)) return;
+
+      delete files[id];
+      localStorage.removeItem(progressKey(id));
+      localStorage.removeItem(contentKey(id));
+
+      if (activeFileId === id) {
+        activeFileId = Object.keys(files)[0] || null;
+      }
+
+      saveFilesMeta();
+      renderFileList();
+
+      if (activeFileId) renderQuiz();
+      else showWelcome();
+    }
+
+    function getStats(id) {
+      const f = files[id];
+      if (!f) return { total: 0, answered: 0, correct: 0, wrong: 0 };
+
+      const { questions, progress } = f;
+      let correct = 0, wrong = 0, answered = 0;
+
+      for (const q of questions) {
+        const key = String(q.number);
+        if (progress.answers[key]?.length) answered++;
+        if (progress.checked[key]) {
+          if (isAnswerCorrect(q, progress.answers[key] || [])) correct++;
+          else wrong++;
+        }
+      }
+
+      return { total: questions.length, answered, correct, wrong };
+    }
+
+    function isAnswerCorrect(q, selected) {
+      const correct = q.correctAnswer.split(',').filter(Boolean);
+      const sel = [...selected].sort();
+      if (sel.length !== correct.length) return false;
+      return sel.every((s, i) => s === correct[i]);
+    }
+
+    function renderFileList() {
+      const list = $('#fileList');
+      const ids = Object.keys(files);
+
+      if (ids.length === 0) {
+        list.innerHTML = '<p style="padding:8px;color:var(--text-muted);font-size:0.82rem;">Chưa có file nào</p>';
+        return;
+      }
+
+      list.innerHTML = ids.map(id => {
+        const f = files[id];
+        const stats = getStats(id);
+        const pct = stats.total ? Math.round((stats.answered / stats.total) * 100) : 0;
+        const active = id === activeFileId ? 'active' : '';
+
+        return `
+          <div class="file-item ${active}" data-id="${id}">
+            <div class="file-item-icon">📄</div>
+            <div class="file-item-info">
+              <div class="file-item-name" title="${f.name}">${f.name}</div>
+              <div class="file-item-meta">
+                <span>${stats.answered}/${stats.total}</span>
+                <div class="mini-progress"><div class="mini-progress-fill" style="width:${pct}%"></div></div>
+              </div>
+            </div>
+            <button class="file-item-delete" data-delete="${id}" title="Xóa">×</button>
+          </div>`;
+      }).join('');
+
+      list.querySelectorAll('.file-item').forEach(el => {
+        el.addEventListener('click', () => {
+          activeFileId = el.dataset.id;
+          renderFileList();
+          renderQuiz();
+        });
+      });
+
+      list.querySelectorAll('[data-delete]').forEach(btn => {
+        btn.addEventListener('click', (e) => deleteFile(btn.dataset.delete, e));
+      });
+    }
+
+    function showWelcome() {
+      $('#welcomeScreen')?.classList.remove('hidden');
+      $('#mainHeader').classList.add('hidden');
+      $('#mainBody').innerHTML = `
+        <div class="welcome" id="welcomeScreen">
+          <div class="welcome-icon">📚</div>
+          <h2>Bắt đầu ôn tập</h2>
+          <p>Import file .md chứa câu hỏi trắc nghiệm. Tiến trình làm bài được lưu tự động cho từng file riêng biệt.</p>
+          <div class="format-hint">
+Câu 1: Nội dung câu hỏi
+img: assets/hinh-minh-hoa.png
+A. Đáp án A
+B. Đáp án B
+C. Đáp án C
+D. Đáp án D
+ans: B
+
+Câu 2: ...
+          </div>
+          <p style="margin-top:16px;font-size:0.82rem;color:var(--text-muted);">
+            Ảnh: đặt file vào thư mục <code style="background:var(--surface-2);padding:2px 6px;border-radius:4px;">assets/</code> cạnh file .md,
+            thêm dòng <code style="background:var(--surface-2);padding:2px 6px;border-radius:4px;">img: assets/ten-anh.png</code>
+            hoặc <code style="background:var(--surface-2);padding:2px 6px;border-radius:4px;">![mô tả](assets/ten-anh.png)</code>
+          </p>
+        </div>`;
+    }
+
+    function renderQuiz() {
+      const f = files[activeFileId];
+      if (!f) { showWelcome(); return; }
+
+      $('#mainHeader').classList.remove('hidden');
+      $('#currentFileName').textContent = f.name;
+
+      const stats = getStats(activeFileId);
+      $('#statTotal').textContent = stats.total;
+      $('#statCorrect').textContent = stats.correct;
+      $('#statWrong').textContent = stats.wrong;
+
+      if (f.progress.showResults) {
+        renderResults();
+        return;
+      }
+
+      const idx = f.progress.currentIndex;
+      const q = f.questions[idx];
+      if (!q) { f.progress.currentIndex = 0; renderQuiz(); return; }
+
+      const key = String(q.number);
+      const selected = f.progress.answers[key] || [];
+      const checked = f.progress.checked[key] || false;
+      const correct = isAnswerCorrect(q, selected);
+
+      const optionKeys = Object.keys(q.options).sort();
+
+      $('#mainBody').innerHTML = `
+        <div class="quiz-layout">
+          <div class="question-card">
+            <div class="question-badge ${q.isMulti ? 'multi' : ''}">
+              ${q.isMulti ? '☑ Chọn nhiều đáp án' : '○ Chọn một đáp án'}
+            </div>
+            <div class="question-text">
+              <strong>Câu ${q.number}:</strong>
+              <div>${renderMarkdown(q.questionText, f.basePath)}</div>
+              ${renderQuestionImages(q.images, f.basePath)}
+            </div>
+            <div class="options ${q.isMulti ? 'multi' : 'single'}" id="options">
+              ${optionKeys.map(letter => {
+                const isSelected = selected.includes(letter);
+                let cls = 'option';
+                if (isSelected) cls += ' selected';
+                if (checked) {
+                  cls += ' disabled';
+                  const isCorrectOpt = q.correctAnswer.split(',').includes(letter);
+                  if (isCorrectOpt && isSelected) cls += ' correct';
+                  else if (isCorrectOpt && !isSelected) cls += ' missed';
+                  else if (!isCorrectOpt && isSelected) cls += ' wrong';
+                }
+                return `
+                  <div class="${cls}" data-letter="${letter}">
+                    <div class="option-marker" aria-hidden="true"><span class="option-marker-inner"></span></div>
+                    <div class="option-text"><span class="option-letter">${letter}.</span>${renderMarkdown(q.options[letter])}</div>
+                  </div>`;
+              }).join('')}
+            </div>
+            ${checked ? `
+              <div class="feedback show ${correct ? 'correct' : 'wrong'}">
+                ${correct ? '✓ Chính xác!' : `✗ Sai rồi — đáp án đúng: ${q.correctAnswer.replace(/,/g, ', ')}`}
+              </div>
+              ${q.ansNote ? `<div class="ans-note">⚠ Đáp án được đánh dấu [${q.ansNote}]</div>` : ''}
+            ` : ''}
+            <div class="btn-row">
+              <button class="btn btn-secondary" id="btnPrev" ${idx === 0 ? 'disabled' : ''}>← Trước</button>
+              ${!checked
+                ? `<button class="btn btn-primary" id="btnCheck" ${selected.length === 0 ? 'disabled' : ''}>Kiểm tra</button>`
+                : `<button class="btn btn-primary" id="btnNext">${idx === f.questions.length - 1 ? 'Xem kết quả' : 'Tiếp →'}</button>`
+              }
+            </div>
+          </div>
+
+          <div class="nav-panel">
+            <h3>Tiến trình</h3>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-label">
+                <span>Đã làm</span>
+                <span>${stats.answered}/${stats.total}</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill" style="width:${stats.total ? (stats.answered / stats.total * 100) : 0}%"></div>
+              </div>
+            </div>
+            <div class="question-grid" id="questionGrid">
+              ${f.questions.map((qq, i) => {
+                const k = String(qq.number);
+                let cls = 'q-dot';
+                if (i === idx) cls += ' current';
+                else if (f.progress.checked[k]) {
+                  cls += isAnswerCorrect(qq, f.progress.answers[k] || []) ? ' checked-correct' : ' checked-wrong';
+                } else if (f.progress.answers[k]?.length) {
+                  cls += ' answered';
+                }
+                return `<button class="${cls}" data-index="${i}">${qq.number}</button>`;
+              }).join('')}
+            </div>
+            <div class="nav-actions">
+              <button class="btn btn-primary" id="btnCheckAll">Kiểm tra tất cả</button>
+              <button class="btn btn-secondary" id="btnRetryWrong">Làm lại câu sai</button>
+              <button class="btn btn-danger" id="btnReset">Reset tiến trình</button>
+            </div>
+          </div>
+        </div>`;
+
+      bindQuizEvents(f, q, idx);
+    }
+
+    function bindQuizEvents(f, q, idx) {
+      const key = String(q.number);
+
+      $('#options')?.querySelectorAll('.option:not(.disabled)').forEach(el => {
+        el.addEventListener('click', () => {
+          const letter = el.dataset.letter;
+          let sel = f.progress.answers[key] || [];
+
+          if (q.isMulti) {
+            sel = sel.includes(letter) ? sel.filter(l => l !== letter) : [...sel, letter].sort();
+          } else {
+            sel = [letter];
+          }
+
+          f.progress.answers[key] = sel;
+          f.progress.checked[key] = false;
+          saveProgress(activeFileId);
+          renderQuiz();
+        });
+      });
+
+      $('#btnCheck')?.addEventListener('click', () => {
+        f.progress.checked[key] = true;
+        saveProgress(activeFileId);
+        renderQuiz();
+        renderFileList();
+      });
+
+      $('#btnNext')?.addEventListener('click', () => {
+        if (idx === f.questions.length - 1) {
+          f.progress.showResults = true;
+          saveProgress(activeFileId);
+          renderQuiz();
+        } else {
+          f.progress.currentIndex = idx + 1;
+          saveProgress(activeFileId);
+          renderQuiz();
+        }
+      });
+
+      $('#btnPrev')?.addEventListener('click', () => {
+        f.progress.currentIndex = Math.max(0, idx - 1);
+        saveProgress(activeFileId);
+        renderQuiz();
+      });
+
+      $('#questionGrid')?.querySelectorAll('.q-dot').forEach(btn => {
+        btn.addEventListener('click', () => {
+          f.progress.currentIndex = parseInt(btn.dataset.index, 10);
+          saveProgress(activeFileId);
+          renderQuiz();
+        });
+      });
+
+      $('#btnCheckAll')?.addEventListener('click', () => {
+        for (const qq of f.questions) {
+          const k = String(qq.number);
+          if (f.progress.answers[k]?.length) f.progress.checked[k] = true;
+        }
+        f.progress.showResults = true;
+        saveProgress(activeFileId);
+        renderQuiz();
+        renderFileList();
+      });
+
+      $('#btnRetryWrong')?.addEventListener('click', () => {
+        const wrongQs = f.questions.filter(qq => {
+          const k = String(qq.number);
+          return f.progress.checked[k] && !isAnswerCorrect(qq, f.progress.answers[k] || []);
+        });
+
+        if (wrongQs.length === 0) {
+          toast('Không có câu sai để làm lại!');
+          return;
+        }
+
+        for (const qq of wrongQs) {
+          const k = String(qq.number);
+          delete f.progress.answers[k];
+          delete f.progress.checked[k];
+        }
+
+        f.progress.showResults = false;
+        f.progress.currentIndex = f.questions.indexOf(wrongQs[0]);
+        saveProgress(activeFileId);
+        renderQuiz();
+        renderFileList();
+        toast(`Làm lại ${wrongQs.length} câu sai`);
+      });
+
+      $('#btnReset')?.addEventListener('click', () => {
+        if (!confirm('Reset toàn bộ tiến trình file này?')) return;
+        f.progress = defaultProgress();
+        saveProgress(activeFileId);
+        renderQuiz();
+        renderFileList();
+        toast('Đã reset tiến trình');
+      });
+    }
+
+    function renderResults() {
+      const f = files[activeFileId];
+      const stats = getStats(activeFileId);
+      const pct = stats.total ? Math.round((stats.correct / stats.total) * 100) : 0;
+
+      let emoji = '🎉';
+      if (pct < 50) emoji = '💪';
+      else if (pct < 80) emoji = '👍';
+
+      $('#mainBody').innerHTML = `
+        <div class="results-card">
+          <div style="font-size:48px">${emoji}</div>
+          <div class="results-score">${pct}%</div>
+          <p class="results-detail">
+            ${stats.correct} đúng · ${stats.wrong} sai · ${stats.total - stats.answered} chưa làm
+            <br>trên tổng ${stats.total} câu
+          </p>
+          <div class="results-actions">
+            <button class="btn btn-primary" id="btnReview">Xem lại từng câu</button>
+            <button class="btn btn-secondary" id="btnRetryWrongResult">Làm lại câu sai (${stats.wrong})</button>
+            <button class="btn btn-danger" id="btnResetResult">Làm lại từ đầu</button>
+          </div>
+        </div>`;
+
+      $('#btnReview')?.addEventListener('click', () => {
+        f.progress.showResults = false;
+        f.progress.currentIndex = 0;
+        saveProgress(activeFileId);
+        renderQuiz();
+      });
+
+      $('#btnRetryWrongResult')?.addEventListener('click', () => {
+        f.progress.showResults = false;
+        const wrongQs = f.questions.filter(qq => {
+          const k = String(qq.number);
+          return f.progress.checked[k] && !isAnswerCorrect(qq, f.progress.answers[k] || []);
+        });
+        for (const qq of wrongQs) {
+          const k = String(qq.number);
+          delete f.progress.answers[k];
+          delete f.progress.checked[k];
+        }
+        f.progress.currentIndex = wrongQs.length ? f.questions.indexOf(wrongQs[0]) : 0;
+        saveProgress(activeFileId);
+        renderQuiz();
+      });
+
+      $('#btnResetResult')?.addEventListener('click', () => {
+        if (!confirm('Làm lại từ đầu?')) return;
+        f.progress = defaultProgress();
+        saveProgress(activeFileId);
+        renderQuiz();
+        renderFileList();
+      });
+    }
+
+    async function init() {
+      const meta = loadFilesMeta();
+
+      for (const [id, info] of Object.entries(meta)) {
+        const content = localStorage.getItem(contentKey(id));
+        if (!content) continue;
+
+        const questions = parseMarkdown(content);
+        if (questions.length === 0) continue;
+
+        files[id] = {
+          name: info.name,
+          basePath: info.basePath || '',
+          path: info.path || '',
+          questions,
+          importedAt: info.importedAt,
+          progress: loadProgress(id)
+        };
+      }
+
+      await loadManifestQuizzes();
+
+      renderFileList();
+
+      const ids = Object.keys(files);
+      if (ids.length > 0) {
+        activeFileId = ids[ids.length - 1];
+        renderQuiz();
+      }
+
+      const sidebar = $('.sidebar');
+      const importBtn = $('#importBtn');
+      const input = $('#fileInput');
+
+      importBtn.addEventListener('click', () => input.click());
+
+      input.addEventListener('change', () => {
+        [...input.files].forEach(importFile);
+        input.value = '';
+      });
+
+      sidebar.addEventListener('dragover', (e) => { e.preventDefault(); sidebar.classList.add('dragover'); });
+      sidebar.addEventListener('dragleave', (e) => {
+        if (!sidebar.contains(e.relatedTarget)) sidebar.classList.remove('dragover');
+      });
+      sidebar.addEventListener('drop', (e) => {
+        e.preventDefault();
+        sidebar.classList.remove('dragover');
+        [...e.dataTransfer.files].filter(f => f.name.endsWith('.md') || f.name.endsWith('.txt')).forEach(importFile);
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>
