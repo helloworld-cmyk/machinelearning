@@ -75,12 +75,58 @@ App render Markdown qua thư viện `marked` (GFM). Có thể dùng:
 | Thành phần | Cách viết |
 |------------|-----------|
 | In đậm | `**text**` |
-| Bảng | Markdown table (`\| cột \| cột \|`) |
+| Bảng | Markdown table chuẩn GFM (xem mẫu bên dưới) |
 | Code | Fenced code block hoặc indent |
-| HTML | `<div>`, `<span>` tuỳ chỉnh (ví dụ bố cục 2 bảng cạnh nhau) |
+| HTML | `<div class="relation-pair">` để xếp 2 bảng quan hệ cạnh nhau |
 | Công thức toán | Unicode hoặc LaTeX trong `$...$` nếu cần |
 
-**Bảng trong đáp án:** mỗi đáp án có thể chứa bảng nhiều dòng — giữ nguyên cấu trúc như trong đề gốc.
+**Bảng quan hệ — BẮT BUỘC dùng markdown table, KHÔNG dùng tab/plain text:**
+
+```
+| A | B | C |
+|:-:|:-:|:-:|
+| 1 | 5 | 8 |
+| 9 | 9 | 9 |
+```
+
+- Dòng header: `| A | B | C |` (có khoảng trắng quanh mỗi cột)
+- Dòng phân cách: `|:-:|:-:|:-:|` (căn giữa mỗi cột)
+- Mỗi dòng dữ liệu: `| 1 | 5 | 8 |`
+
+**Hai quan hệ cạnh nhau trong câu hỏi** — bọc bằng HTML `relation-pair`:
+
+```
+<div class="relation-pair">
+<div class="relation-block">
+
+**r**
+
+| A | B | C |
+|:-:|:-:|:-:|
+| 1 | 5 | 8 |
+
+</div>
+<div class="relation-block">
+
+**t**
+
+| A | B | E |
+|:-:|:-:|:-:|
+| 1 | 5 | 5 |
+
+</div>
+</div>
+```
+
+**Bảng trong đáp án:** ghi `A.` trên một dòng riêng, bảng markdown ngay dòng sau (không dùng tab, không gộp header + dữ liệu thành plain text):
+
+```
+A.
+| A | B | C | E |
+|:-:|:-:|:-:|:-:|
+| 1 | 5 | 8 | 5 |
+| 9 | 9 | 9 | 7 |
+```
 
 ### 5. Ảnh minh hoạ
 
@@ -153,36 +199,66 @@ ans: B
 ### Ví dụ có bảng, ảnh, nhiều đáp án (CSDL)
 
 ```
-Câu 1: Cho quan hệ **R(A, B, C)**:
+Câu 1: Cho 2 quan hệ **r(A, B, C)** và **t(A, B, E)**:
+
+<div class="relation-pair">
+<div class="relation-block">
+
+**r**
 
 | A | B | C |
 |:-:|:-:|:-:|
 | 1 | 5 | 8 |
 | 9 | 9 | 9 |
+| 6 | 5 | 7 |
+| 2 | 6 | 7 |
 
-Kết quả của biểu thức đại số quan hệ **R ∗ S** là?
+</div>
+<div class="relation-block">
+
+**t**
+
+| A | B | E |
+|:-:|:-:|:-:|
+| 1 | 5 | 5 |
+| 1 | 5 | 6 |
+| 9 | 9 | 7 |
+| 2 | 6 | 5 |
+| 9 | 9 | 6 |
+
+</div>
+</div>
+
+Kết quả của biểu thức đại số quan hệ **r ∗ t** là?
 
 A.
-| A | B | C | D |
+| A | B | C | E |
 |:-:|:-:|:-:|:-:|
 | 1 | 5 | 8 | 5 |
+| 9 | 9 | 9 | 7 |
+| 9 | 9 | 9 | 6 |
+| 2 | 6 | 7 | 5 |
 
 B.
-| A | B | C | D |
-|:-:|:-:|:-:|:-:|
-| 1 | 5 | 8 | 5 |
-| 9 | 9 | 9 | 7 |
-
-C.
-| A | B | C | D |
-|:-:|:-:|:-:|:-:|
-| 9 | 9 | 9 | 7 |
-
-D.
-| A | B | C | D |
+| A | B | C | E |
 |:-:|:-:|:-:|:-:|
 | 1 | 5 | 8 | 5 |
 | 1 | 5 | 8 | 6 |
+| 9 | 9 | 9 | 7 |
+| 9 | 9 | 9 | 6 |
+| 2 | 6 | 7 | 5 |
+
+C.
+| A | B | C | E |
+|:-:|:-:|:-:|:-:|
+| 1 | 5 | 8 | 5 |
+| 9 | 9 | 9 | 7 |
+| 2 | 6 | 7 | 5 |
+
+D.
+| A | B | C | E |
+|:-:|:-:|:-:|:-:|
+| 1 | 5 | 8 | 5 |
 
 ans: B
 
@@ -247,6 +323,9 @@ ans: [A hoặc A,B,C nếu nhiều đáp án đúng]
 
 Quy tắc:
 - Mỗi lựa chọn một dòng (A. B. C. D.) — nội dung đáp án có thể nhiều dòng (bảng...)
+- Bảng quan hệ: dùng markdown table (| A | B | C | + |:-:|:-:|:-:| + từng dòng dữ liệu), KHÔNG dùng tab/plain text
+- Hai quan hệ cạnh nhau: bọc trong <div class="relation-pair"> với 2 <div class="relation-block"> (xem prompt.md mục 4)
+- Đáp án dạng bảng: ghi A. trên dòng riêng, bảng markdown ngay dòng sau
 - ans: một đáp án → ans: B | nhiều đáp án → ans: A,C,D (cách nhau bằng dấu phẩy, không khoảng trắng)
 - Ảnh minh hoạ: dòng img: assets/ten-anh.png giữa câu hỏi và đáp án
 - Giữ nguyên nội dung gốc, sửa lỗi OCR nếu cần
