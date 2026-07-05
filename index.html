@@ -545,6 +545,29 @@
 
     .md-content p { margin: 0.5em 0; }
     .md-content strong { color: var(--text); font-weight: 600; }
+    .md-content em { font-style: italic; color: var(--text); }
+    .md-content u { text-decoration: underline; text-underline-offset: 2px; }
+
+    /* Database schema: PK = bold + underline, FK = italic */
+    .md-content .schema-pk {
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .md-content .schema-fk {
+      font-style: italic;
+      color: var(--text);
+    }
+
+    .md-content .schema-pkfk {
+      font-weight: 700;
+      font-style: italic;
+      color: var(--text);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
 
     .md-content code {
       font-family: 'JetBrains Mono', monospace;
@@ -1056,8 +1079,15 @@ Câu 2: ...
       return questions.sort((a, b) => a.number - b.number);
     }
 
+    function preprocessSchemaNotation(text) {
+      return text
+        .replace(/\{pkfk\}(.+?)\{\/pkfk\}/gi, '<span class="schema-pkfk">$1</span>')
+        .replace(/\{pk\}(.+?)\{\/pk\}/gi, '<span class="schema-pk">$1</span>')
+        .replace(/\{fk\}(.+?)\{\/fk\}/gi, '<span class="schema-fk">$1</span>');
+    }
+
     function renderMarkdown(text, basePath = '') {
-      let processed = text;
+      let processed = preprocessSchemaNotation(text);
       if (basePath) {
         processed = processed.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, src) =>
           `![${alt}](${resolveAssetPath(basePath, src)})`
